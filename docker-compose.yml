@@ -1,0 +1,64 @@
+services:
+  balancer:
+    image: shashwot/nginx-more:latest
+    container_name: balancer
+    restart: always
+    ports:
+      - target: 80
+        published: 8080
+        mode: host
+    volumes:
+      - ./nginx-balancer.conf:/etc/nginx/nginx.conf
+      - ./GeoIP/GeoLite2-Country.mmdb:/var/lib/GeoIP/GeoLite2-Country.mmdb
+    depends_on:
+      - server_ua
+      - server_us1
+      - server_us2
+      - server_rest
+    networks:
+      - balancer
+
+  server_ua:
+    image: nginx:latest
+    container_name: server_ua
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./server_ua:/usr/share/nginx/html
+    networks:
+      - balancer
+  
+  server_us1:
+    image: nginx:latest
+    container_name: server_us1
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./server_us:/usr/share/nginx/html
+    networks:
+      - balancer
+
+  server_us2:
+    image: nginx:latest
+    container_name: server_us2
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./server_us:/usr/share/nginx/html
+    networks:
+      - balancer
+
+  server_rest:
+    image: nginx:latest
+    container_name: server_rest
+    restart: always
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./server_rest:/usr/share/nginx/html
+    networks:
+      - balancer
+
+networks:
+  balancer:
+    external: true
+    driver: bridge
